@@ -1,0 +1,21 @@
+{
+  "name": "torn-chain-report",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.1",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6",
+    "vite": "^8.0.11",
+    "vite-plugin-monkey": "^8.0.0",
+    "vitest": "^4.1.11"
+  }
+}
