@@ -15,7 +15,9 @@ export class FactionView {
      * @param {Element} mountElement
      */
     render(mountElement) {
-        const { root, input, button } = createPanel({ initialValue: this.viewModel.apiKey });
+        const { root, input, button } = createPanel({
+            initialValue: this.viewModel.apiKey,
+        });
 
         button.addEventListener("click", () => {
             this.viewModel.apiKey = input.value;

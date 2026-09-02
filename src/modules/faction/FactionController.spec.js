@@ -25,9 +25,9 @@ describe("FactionController", () => {
     it("init() includes Torn API-key label in the injected panel", () => {
         const controller = new FactionController();
         controller.init();
-        const panel = document
-            .querySelector("#faction_war_list_id")
-            ?.nextElementSibling;
+        const panel = document.querySelector(
+            "#faction_war_list_id",
+        )?.nextElementSibling;
         expect(panel?.querySelector("span")?.textContent).toBe("Torn API-key");
     });
 });
