@@ -1,14 +1,14 @@
 test:
-    bun test
+    bun run test
 
 lint:
-    bun lint
+    bun run lint
 
 format:
-    bun format
+    bun run format
 
 format-check:
-    bun format-check
+    bun run format-check
 
 build:
     bun run build
