@@ -3,8 +3,8 @@ import { FactionViewModel } from "./FactionViewModel.js";
 
 export class FactionController {
     constructor() {
-        this.view = new FactionView();
         this.vm = new FactionViewModel();
+        this.view = new FactionView(this.vm);
     }
 
     init() {

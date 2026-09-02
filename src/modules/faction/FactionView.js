@@ -1,23 +1,24 @@
+import { createPanel } from "./ui/createPanel.js";
+
 export class FactionView {
     /**
-     * Injects a Torn-styled API-key panel immediately after mountEl.
+     * @param {import("./FactionViewModel.js").FactionViewModel} vm
+     */
+    constructor(vm) {
+        this.vm = vm;
+    }
+
+    /**
+     * Renders the Chain Report panel immediately after mountEl.
      * @param {Element} mountEl
      */
     render(mountEl) {
-        const panel = document.createElement("div");
-        panel.className = "profile-wrapper medals-wrapper m-top10";
+        const { root, input, button } = createPanel({ initialValue: this.vm.apiKey });
 
-        panel.innerHTML = `
-            <div class="menu-header">Chain Report</div>
-            <div class="profile-container">
-                <div class="profile-container-description">
-                    <span>Torn API-key</span>
-                    <input type="password" />
-                    <button>Save</button>
-                </div>
-            </div>
-        `;
+        button.addEventListener("click", () => {
+            this.vm.apiKey = input.value;
+        });
 
-        mountEl.insertAdjacentElement("afterend", panel);
+        mountEl.insertAdjacentElement("afterend", root);
     }
 }
