@@ -3,13 +3,13 @@ import { FactionViewModel } from "./FactionViewModel.js";
 
 export class FactionController {
     constructor() {
-        this.vm = new FactionViewModel();
-        this.view = new FactionView(this.vm);
+        this.viewModel = new FactionViewModel();
+        this.view = new FactionView(this.viewModel);
     }
 
     init() {
-        const mountEl = document.querySelector("#faction_war_list_id");
-        if (!mountEl) return;
-        this.view.render(mountEl);
+        const mountElement = document.querySelector("#faction_war_list_id");
+        if (!mountElement) return;
+        this.view.render(mountElement);
     }
 }
