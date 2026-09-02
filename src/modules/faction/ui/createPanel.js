@@ -5,17 +5,17 @@
  */
 export function createPanel({ initialValue = "" } = {}) {
     const root = document.createElement("div");
-    root.className = "profile-wrapper medals-wrapper m-top10";
+    root.classList.add("profile-wrapper", "medals-wrapper", "m-top10");
 
     const header = document.createElement("div");
-    header.className = "menu-header";
+    header.classList.add("menu-header");
     header.textContent = "Chain Report";
 
     const container = document.createElement("div");
-    container.className = "profile-container";
+    container.classList.add("profile-container");
 
     const description = document.createElement("div");
-    description.className = "profile-container-description";
+    description.classList.add("profile-container-description");
 
     const label = document.createElement("span");
     label.textContent = "Torn API-key";
