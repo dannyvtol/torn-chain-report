@@ -20,26 +20,26 @@ describe("FactionView", () => {
         document.body.innerHTML = "";
     });
 
-    it("injects a panel immediately after the mount element", () => {
+    it("injects a panel as child of the mount element", () => {
         view.render(mountElement);
-        expect(mountElement.nextElementSibling).not.toBeNull();
+        expect(mountElement.firstElementChild).not.toBeNull();
     });
 
-    it("panel has torn-native profile-wrapper class", () => {
+    it("panel has title-black header class", () => {
         view.render(mountElement);
-        const panel = mountElement.nextElementSibling;
-        expect(panel.classList.contains("profile-wrapper")).toBe(true);
+        const panel = mountElement.firstElementChild;
+        expect(panel.querySelector(".title-black")).not.toBeNull();
     });
 
     it("panel contains a span with text 'Torn API-key'", () => {
         view.render(mountElement);
-        const span = mountElement.nextElementSibling.querySelector("span");
+        const span = mountElement.firstElementChild.querySelector("span");
         expect(span?.textContent).toBe("Torn API-key");
     });
 
     it("panel contains a password input", () => {
         view.render(mountElement);
-        const input = mountElement.nextElementSibling.querySelector(
+        const input = mountElement.firstElementChild.querySelector(
             "input[type='password']",
         );
         expect(input).not.toBeNull();
@@ -47,14 +47,14 @@ describe("FactionView", () => {
 
     it("panel contains a Save button", () => {
         view.render(mountElement);
-        const button = mountElement.nextElementSibling.querySelector("button");
+        const button = mountElement.firstElementChild.querySelector("button");
         expect(button?.textContent).toBe("Save");
     });
 
     it("pre-populates input with viewModel.apiKey", () => {
         viewModel.apiKey = "mykey";
         view.render(mountElement);
-        const input = mountElement.nextElementSibling.querySelector(
+        const input = mountElement.firstElementChild.querySelector(
             "input[type='password']",
         );
         expect(input?.value).toBe("mykey");
@@ -62,7 +62,7 @@ describe("FactionView", () => {
 
     it("Save button click updates viewModel.apiKey from input value", () => {
         view.render(mountElement);
-        const panel = mountElement.nextElementSibling;
+        const panel = mountElement.firstElementChild;
         const input = panel.querySelector("input[type='password']");
         const button = panel.querySelector("button");
         input.value = "newkey";

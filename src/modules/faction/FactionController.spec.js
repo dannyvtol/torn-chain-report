@@ -13,21 +13,23 @@ describe("FactionController", () => {
         document.body.innerHTML = "";
     });
 
-    it("init() injects a panel after #faction_war_list_id", () => {
+    it("init() injects a wrapper after #faction_war_list_id containing the panel", () => {
         const controller = new FactionController();
         controller.init();
         const mountElement = document.querySelector("#faction_war_list_id");
-        const panel = mountElement?.nextElementSibling;
-        expect(panel).not.toBeNull();
-        expect(panel.classList.contains("profile-wrapper")).toBe(true);
+        const wrapper = mountElement?.nextElementSibling;
+        expect(wrapper).not.toBeNull();
+        expect(wrapper.querySelector(".title-black")).not.toBeNull();
     });
 
     it("init() includes Torn API-key label in the injected panel", () => {
         const controller = new FactionController();
         controller.init();
-        const panel = document.querySelector(
+        const wrapper = document.querySelector(
             "#faction_war_list_id",
         )?.nextElementSibling;
-        expect(panel?.querySelector("span")?.textContent).toBe("Torn API-key");
+        expect(wrapper?.querySelector("span")?.textContent).toBe(
+            "Torn API-key",
+        );
     });
 });

@@ -11,10 +11,10 @@ export class FactionView {
     }
 
     /**
-     * Renders the Chain Report panel immediately after mountElement.
-     * @param {Element} mountElement
+     * Renders the Chain Report panel into the given wrapper element.
+     * @param {Element} wrapper
      */
-    render(mountElement) {
+    render(wrapper) {
         const { root, input, button } = createPanel({
             initialValue: this.viewModel.apiKey,
         });
@@ -23,6 +23,6 @@ export class FactionView {
             this.viewModel.apiKey = input.value;
         });
 
-        mountElement.insertAdjacentElement("afterend", root);
+        wrapper.append(root);
     }
 }
