@@ -7,6 +7,9 @@ lint:
 format:
     bun prettier --write src
 
+format-check:
+    bun prettier --check src
+
 build:
     bun vite build
 
