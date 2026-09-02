@@ -1,3 +1,7 @@
+## Coding standards
+
+Use full variable names — no abbreviations. See `docs/coding-standards.md`.
+
 ## Agent skills
 
 ### Issue tracker
