@@ -5,17 +5,21 @@
  */
 export function createPanel({ initialValue = "" } = {}) {
     const root = document.createElement("div");
-    root.classList.add("profile-wrapper", "medals-wrapper", "m-top10");
 
     const header = document.createElement("div");
-    header.classList.add("menu-header");
+    header.classList.add(
+        "title-black",
+        "m-top10",
+        "tt-foldable-infobox",
+        "tt-infobox-title",
+        "top-round",
+    );
     header.textContent = "Chain Report";
 
     const container = document.createElement("div");
-    container.classList.add("profile-container");
+    container.classList.add("cont-gray10", "bottom-round", "tt-foldable");
 
-    const description = document.createElement("div");
-    description.classList.add("profile-container-description");
+    const form = document.createElement("div");
 
     const label = document.createElement("span");
     label.textContent = "Torn API-key";
@@ -25,10 +29,12 @@ export function createPanel({ initialValue = "" } = {}) {
     input.value = initialValue;
 
     const button = document.createElement("button");
+    button.classList.add("torn-btn");
+    button.style = "margin-top: 10px;";
     button.textContent = "Save";
 
-    description.append(label, input, button);
-    container.append(description);
+    form.append(label, input);
+    container.append(form, button);
     root.append(header, container);
 
     return { root, input, button };

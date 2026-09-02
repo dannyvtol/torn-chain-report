@@ -7,16 +7,14 @@ describe("createPanel", () => {
         document.body.innerHTML = "";
     });
 
-    it("returns a root element with torn-native wrapper classes", () => {
+    it("returns a root element containing a header and container", () => {
         const { root } = createPanel();
-        expect(root.classList.contains("profile-wrapper")).toBe(true);
-        expect(root.classList.contains("medals-wrapper")).toBe(true);
-        expect(root.classList.contains("m-top10")).toBe(true);
+        expect(root.children.length).toBe(2);
     });
 
-    it("root contains a menu-header with text 'Chain Report'", () => {
+    it("root contains a title-black header with text 'Chain Report'", () => {
         const { root } = createPanel();
-        const header = root.querySelector(".menu-header");
+        const header = root.querySelector(".title-black");
         expect(header?.textContent).toBe("Chain Report");
     });
 
