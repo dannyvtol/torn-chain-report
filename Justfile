@@ -1,14 +1,17 @@
 test:
-    bun vitest run
+    bun run test
 
 lint:
-    bun eslint src
+    bun run lint
 
 format:
-    bun prettier --write src
+    bun run format
+
+format-check:
+    bun run format-check
 
 build:
-    bun vite build
+    bun run build
 
 check:
-    just lint && bun prettier --check src && just test
+    just lint && just format-check && just test
