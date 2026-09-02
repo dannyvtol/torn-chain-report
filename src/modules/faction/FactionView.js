@@ -1,8 +1,10 @@
 import { createPanel } from "./ui/createPanel.js";
 
+/** @typedef {import("./FactionViewModel.js").FactionViewModel} FactionViewModel */
+
 export class FactionView {
     /**
-     * @param {import("./FactionViewModel.js").FactionViewModel} viewModel
+     * @param {FactionViewModel} viewModel
      */
     constructor(viewModel) {
         this.viewModel = viewModel;
