@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FactionController } from "./FactionController.js";
 
-/** @returns {import("../../shared/stores/SettingsStore.js").SettingsStore} */
+/** @typedef {import("../../shared/stores/SettingsStore.js").SettingsStore} SettingsStore */
+
+/** @returns {SettingsStore} */
 function makeStubStore({ apiKey = "" } = {}) {
     return {
         getApiKey: vi.fn().mockResolvedValue(apiKey),
