@@ -1,13 +1,23 @@
+import { SettingsStore } from "../../shared/stores/SettingsStore.js";
 import { FactionView } from "./FactionView.js";
 import { FactionViewModel } from "./FactionViewModel.js";
 
+/** @typedef {import("../../shared/stores/SettingsStore.js").SettingsStore} SettingsStore */
+
 export class FactionController {
-    constructor() {
+    /** @param {SettingsStore} [settingsStore] */
+    constructor(settingsStore = new SettingsStore()) {
         this.viewModel = new FactionViewModel();
-        this.view = new FactionView(this.viewModel);
+        this.settingsStore = settingsStore;
+        this.view = new FactionView(this.viewModel, {
+            onSave: () => this.settingsStore.setApiKey(this.viewModel.apiKey),
+        });
     }
 
-    init() {
+    async init() {
+        const storedKey = await this.settingsStore.getApiKey();
+        this.viewModel.apiKey = storedKey;
+
         this.wrapper = document.createElement("div");
         this.wrapper.dataset.tcr = "faction-panel";
 
