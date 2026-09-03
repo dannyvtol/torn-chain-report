@@ -1,9 +1,14 @@
+import { EVENT_TYPE_LABELS } from "../eventTypeLabels.js";
+
 /**
  * Builds the Chain Report API-key panel using DOM construction.
- * @param {{ initialValue?: string }} [options]
- * @returns {{ root: HTMLElement, input: HTMLInputElement, button: HTMLButtonElement }}
+ * @param {{ initialValue?: string, initialEventType?: string }} [options]
+ * @returns {{ root: HTMLElement, input: HTMLInputElement, button: HTMLButtonElement, statusElement: HTMLElement }}
  */
-export function createPanel({ initialValue = "" } = {}) {
+export function createPanel({
+    initialValue = "",
+    initialEventType = "detecting",
+} = {}) {
     const root = document.createElement("div");
 
     const header = document.createElement("div");
@@ -33,9 +38,13 @@ export function createPanel({ initialValue = "" } = {}) {
     button.style = "margin-top: 10px;";
     button.textContent = "Save";
 
+    const statusElement = document.createElement("p");
+    statusElement.textContent =
+        EVENT_TYPE_LABELS[initialEventType] ?? initialEventType;
+
     form.append(label, input);
-    container.append(form, button);
+    container.append(form, button, statusElement);
     root.append(header, container);
 
-    return { root, input, button };
+    return { root, input, button, statusElement };
 }

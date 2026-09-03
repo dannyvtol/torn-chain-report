@@ -51,4 +51,20 @@ describe("createPanel", () => {
         expect(root.contains(input)).toBe(true);
         expect(root.contains(button)).toBe(true);
     });
+
+    it("returns a statusElement ref inside root", () => {
+        const { root, statusElement } = createPanel();
+        expect(statusElement).not.toBeNull();
+        expect(root.contains(statusElement)).toBe(true);
+    });
+
+    it("statusElement displays the initialEventType text", () => {
+        const { statusElement } = createPanel({ initialEventType: "war" });
+        expect(statusElement.textContent).toBe("War active");
+    });
+
+    it("statusElement defaults to 'Detecting…' when initialEventType is omitted", () => {
+        const { statusElement } = createPanel();
+        expect(statusElement.textContent).toBe("Detecting…");
+    });
 });
