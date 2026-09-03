@@ -6,6 +6,10 @@ describe("MissingApiKey", () => {
     it("is an instance of Error", () => {
         expect(new MissingApiKey()).toBeInstanceOf(Error);
     });
+
+    it("has a default message", () => {
+        expect(new MissingApiKey().message).toBe("API key is missing or empty.");
+    });
 });
 
 describe("ApiClient", () => {
@@ -66,14 +70,13 @@ describe("ApiClient", () => {
                 expect(result).toEqual({ data: "result" });
             });
 
-            it("throws an Error with status and statusText on non-ok response", async () => {
+            it("throws an Error with the HTTP status code on non-ok response", async () => {
                 fetchSpy.mockResolvedValue({
                     ok: false,
                     status: 403,
-                    statusText: "Forbidden",
                 });
                 const client = new ApiClient(apiKey);
-                await expect(client.get("/faction")).rejects.toThrow("HTTP 403: Forbidden");
+                await expect(client.get("/faction")).rejects.toThrow("HTTP 403");
             });
         });
     });
