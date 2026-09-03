@@ -1,7 +1,7 @@
 import js from "@eslint/js";
 import globals from "globals";
 import prettierConfig from "eslint-config-prettier";
-import importPlugin from "eslint-plugin-import";
+import importPlugin from "eslint-plugin-import-x";
 import jsdocPlugin from "eslint-plugin-jsdoc";
 import noJsdocInlineImport from "./eslint-local-rules/no-jsdoc-inline-import.js";
 
