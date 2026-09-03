@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { FactionView } from "./FactionView.js";
 import { FactionViewModel } from "./FactionViewModel.js";
@@ -78,5 +78,14 @@ describe("FactionView", () => {
         );
         viewModel.apiKey = "injected";
         expect(input.value).toBe("original");
+    });
+
+    it("clicking the Save button calls the onSave callback", () => {
+        const onSave = vi.fn();
+        view = new FactionView(viewModel, { onSave });
+        view.render(mountElement);
+        const button = mountElement.firstElementChild.querySelector("button");
+        button.click();
+        expect(onSave).toHaveBeenCalledOnce();
     });
 });

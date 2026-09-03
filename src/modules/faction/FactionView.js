@@ -5,9 +5,11 @@ import { createPanel } from "./ui/createPanel.js";
 export class FactionView {
     /**
      * @param {FactionViewModel} viewModel
+     * @param {{ onSave?: () => void }} [options]
      */
-    constructor(viewModel) {
+    constructor(viewModel, { onSave } = {}) {
         this.viewModel = viewModel;
+        this.onSave = onSave ?? null;
     }
 
     /**
@@ -24,7 +26,7 @@ export class FactionView {
         });
 
         button.addEventListener("click", () => {
-            // TODO: trigger fetch
+            this.onSave?.();
         });
 
         wrapper.append(root);
