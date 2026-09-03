@@ -25,8 +25,8 @@ export class FactionView {
             this.viewModel.apiKey = input.value;
         });
 
-        button.addEventListener("click", () => {
-            this.onSave?.();
+        button.addEventListener("click", async () => {
+            await this.onSave?.();
         });
 
         wrapper.append(root);
