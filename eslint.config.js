@@ -18,7 +18,7 @@ export default [
         languageOptions: { globals: globals.browser },
         rules: {
             "no-console": "warn",
-            "id-length": ["error", { min: 3, exceptions: ["id", "i", "j"] }],
+            "id-length": ["error", { min: 3, exceptions: ["id", "i", "j", "GM"] }],
             "import/order": [
                 "error",
                 {
