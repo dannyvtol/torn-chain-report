@@ -19,8 +19,12 @@ export class FactionView {
             initialValue: this.viewModel.apiKey,
         });
 
-        button.addEventListener("click", () => {
+        input.addEventListener("input", () => {
             this.viewModel.apiKey = input.value;
+        });
+
+        button.addEventListener("click", () => {
+            // TODO: trigger fetch
         });
 
         wrapper.append(root);

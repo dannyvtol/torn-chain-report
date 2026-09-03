@@ -60,13 +60,23 @@ describe("FactionView", () => {
         expect(input?.value).toBe("mykey");
     });
 
-    it("Save button click updates viewModel.apiKey from input value", () => {
+    it("typing in the password input updates viewModel.apiKey in real time", () => {
         view.render(mountElement);
-        const panel = mountElement.firstElementChild;
-        const input = panel.querySelector("input[type='password']");
-        const button = panel.querySelector("button");
+        const input = mountElement.firstElementChild.querySelector(
+            "input[type='password']",
+        );
         input.value = "newkey";
-        button.click();
+        input.dispatchEvent(new Event("input"));
         expect(viewModel.apiKey).toBe("newkey");
+    });
+
+    it("setting viewModel.apiKey programmatically does not update the input value", () => {
+        viewModel.apiKey = "original";
+        view.render(mountElement);
+        const input = mountElement.firstElementChild.querySelector(
+            "input[type='password']",
+        );
+        viewModel.apiKey = "injected";
+        expect(input.value).toBe("original");
     });
 });
