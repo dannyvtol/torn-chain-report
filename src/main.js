@@ -1,5 +1,5 @@
-import { GM } from "$";
 import { FactionController } from "./modules/faction/FactionController.js";
+import { GM } from "$";
 
 globalThis.GM = GM;
 
