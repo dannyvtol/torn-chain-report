@@ -3,7 +3,7 @@ export class SettingsStore {
      * @returns {Promise<string>}
      */
     async getApiKey() {
-        return GM.getValue("apiKey", "");
+        return globalThis.GM.getValue("apiKey", "");
     }
 
     /**
@@ -11,6 +11,6 @@ export class SettingsStore {
      * @returns {Promise<void>}
      */
     async setApiKey(value) {
-        return GM.setValue("apiKey", value);
+        return globalThis.GM.setValue("apiKey", value);
     }
 }

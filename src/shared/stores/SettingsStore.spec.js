@@ -11,17 +11,17 @@ describe("SettingsStore", () => {
     });
 
     it("getApiKey returns value from GM.getValue", async () => {
-        GM.getValue.mockResolvedValue("stored-key");
+        globalThis.GM.getValue.mockResolvedValue("stored-key");
         const store = new SettingsStore();
         const result = await store.getApiKey();
         expect(result).toBe("stored-key");
-        expect(GM.getValue).toHaveBeenCalledWith("apiKey", "");
+        expect(globalThis.GM.getValue).toHaveBeenCalledWith("apiKey", "");
     });
 
     it("setApiKey calls GM.setValue with the key", async () => {
-        GM.setValue.mockResolvedValue(undefined);
+        globalThis.GM.setValue.mockResolvedValue(undefined);
         const store = new SettingsStore();
         await store.setApiKey("my-key");
-        expect(GM.setValue).toHaveBeenCalledWith("apiKey", "my-key");
+        expect(globalThis.GM.setValue).toHaveBeenCalledWith("apiKey", "my-key");
     });
 });
