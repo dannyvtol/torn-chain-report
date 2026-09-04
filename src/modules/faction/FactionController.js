@@ -56,10 +56,17 @@ export class FactionController {
                 apiClient.get("/faction/chain"),
             ]);
 
-            const warActive = rankedwarsResponse.rankedwars[0].end === null;
+            const currentWar = rankedwarsResponse.rankedwars[0];
+            const warActive = currentWar.end === null;
             const chainActive = chainResponse.chain.end === null;
 
             if (warActive) {
+                const chainsResponse = await apiClient.get("/faction/chains", {
+                    from: String(currentWar.start),
+                });
+                this.viewModel.chainIds = chainsResponse.chains
+                    .filter((entry) => entry.end !== null)
+                    .map((entry) => entry.id);
                 this.viewModel.eventType = "war";
             } else if (chainActive) {
                 this.viewModel.eventType = "chain";
