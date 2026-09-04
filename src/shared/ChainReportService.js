@@ -1,6 +1,6 @@
 /** @typedef {import("./ApiClient.js").ApiClient} ApiClient */
 
-const BREAKDOWN_FIELDS = [
+export const BREAKDOWN_FIELDS = [
     "leave",
     "mug",
     "hospitalize",
@@ -32,9 +32,6 @@ export class ChainReportService {
      * @returns {Promise<{ chainBreakdown: Record<string, number> }>}
      */
     async aggregate(chainIds) {
-        const zeroBreakdown = () =>
-            Object.fromEntries(BREAKDOWN_FIELDS.map((field) => [field, 0]));
-
         const [userResult, ...chainResults] = await Promise.allSettled([
             this.#apiClient.get("/user/basic"),
             ...chainIds.map((id) =>
@@ -47,7 +44,7 @@ export class ChainReportService {
         }
 
         const userId = userResult.value.profile.id;
-        const totals = zeroBreakdown();
+        const totals = Object.fromEntries(BREAKDOWN_FIELDS.map((field) => [field, 0]));
 
         for (const [index, result] of chainResults.entries()) {
             if (result.status === "rejected") {

@@ -1,22 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ChainReportService } from "./ChainReportService.js";
+import { BREAKDOWN_FIELDS, ChainReportService } from "./ChainReportService.js";
 
 /** @typedef {import("./ApiClient.js").ApiClient} ApiClient */
-
-const BREAKDOWN_FIELDS = [
-    "leave",
-    "mug",
-    "hospitalize",
-    "assists",
-    "retaliations",
-    "overseas",
-    "draws",
-    "escapes",
-    "losses",
-    "war",
-    "bonuses",
-];
 
 function makeAttackerEntry(userId, overrides = {}) {
     return {
