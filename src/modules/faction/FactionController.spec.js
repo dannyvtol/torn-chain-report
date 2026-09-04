@@ -5,6 +5,8 @@ import { FactionController } from "./FactionController.js";
 
 /** @typedef {import("../../shared/stores/SettingsStore.js").SettingsStore} SettingsStore */
 /** @typedef {import("../../shared/ApiClient.js").ApiClient} ApiClient */
+/** @typedef {import("../../shared/stores/ReportStore.js").ReportStore} ReportStore */
+/** @typedef {import("../../shared/ChainReportService.js").ChainReportService} ChainReportService */
 
 /** @returns {SettingsStore} */
 function makeStubStore({ apiKey = "" } = {}) {
@@ -14,6 +16,30 @@ function makeStubStore({ apiKey = "" } = {}) {
     };
 }
 
+/** @returns {ReportStore} */
+function makeStubReportStore() {
+    return {
+        getReport: vi.fn().mockResolvedValue(null),
+        setReport: vi.fn().mockResolvedValue(undefined),
+    };
+}
+
+/**
+ * @param {{ chainBreakdown?: Record<string, number>, error?: Error }} [options]
+ * @returns {(apiClient: ApiClient) => ChainReportService}
+ */
+function makeStubChainReportServiceFactory({
+    chainBreakdown = { leave: 0 },
+    error = undefined,
+} = {}) {
+    return () => ({
+        aggregate: vi.fn().mockImplementation(() => {
+            if (error) return Promise.reject(error);
+            return Promise.resolve({ chainBreakdown });
+        }),
+    });
+}
+
 /**
  * @param {{
  *   rankedwarsEnd?: null | number,
@@ -21,6 +47,7 @@ function makeStubStore({ apiKey = "" } = {}) {
  *   chainEnd?: null | number,
  *   chains?: Array<{ id: number, end: number | null }>,
  *   chainsError?: Error,
+ *   userId?: number,
  * }} [options]
  * @returns {(apiKey: string) => ApiClient}
  */
@@ -30,6 +57,7 @@ function makeStubApiClientFactory({
     chainEnd = 0,
     chains = [],
     chainsError = undefined,
+    userId = 1,
 } = {}) {
     return () => ({
         get: vi.fn().mockImplementation((path) => {
@@ -46,6 +74,14 @@ function makeStubApiClientFactory({
             if (path === "/faction/chains") {
                 if (chainsError) return Promise.reject(chainsError);
                 return Promise.resolve({ chains });
+            }
+            if (path === "/user/basic") {
+                return Promise.resolve({ profile: { id: userId } });
+            }
+            if (path.endsWith("/chainreport")) {
+                return Promise.resolve({
+                    chainreport: { attackers: [], bonuses: [] },
+                });
             }
             return Promise.reject(new Error(`Unexpected path: ${path}`));
         }),
@@ -69,6 +105,11 @@ describe("FactionController", () => {
         const element = document.createElement("div");
         element.id = "faction_war_list_id";
         document.body.appendChild(element);
+
+        globalThis.GM = {
+            getValue: vi.fn().mockResolvedValue(null),
+            setValue: vi.fn().mockResolvedValue(undefined),
+        };
     });
 
     afterEach(() => {
@@ -275,6 +316,78 @@ describe("FactionController", () => {
                 ([path]) => path === "/faction/chains",
             );
             expect(chainsCalls).toHaveLength(0);
+        });
+    });
+
+    describe("chain report aggregation", () => {
+        it("calls aggregate with collected chainIds when war is active", async () => {
+            const chainReportServiceFactory =
+                makeStubChainReportServiceFactory();
+            const stubService = chainReportServiceFactory();
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({
+                    rankedwarsEnd: null,
+                    chains: [
+                        { id: 101, end: 1700000000 },
+                        { id: 102, end: 1700001000 },
+                    ],
+                }),
+                makeStubReportStore(),
+                () => stubService,
+            );
+            await controller.init();
+            expect(stubService.aggregate).toHaveBeenCalledWith([101, 102]);
+        });
+
+        it("persists aggregate result to ReportStore when war is active", async () => {
+            const aggregatedReport = { chainBreakdown: { leave: 3 } };
+            const reportStore = makeStubReportStore();
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({
+                    rankedwarsEnd: null,
+                    chains: [{ id: 101, end: 1700000000 }],
+                }),
+                reportStore,
+                makeStubChainReportServiceFactory({
+                    chainBreakdown: aggregatedReport.chainBreakdown,
+                }),
+            );
+            await controller.init();
+            expect(reportStore.setReport).toHaveBeenCalledWith(
+                aggregatedReport,
+            );
+        });
+
+        it("does not call aggregate when eventType is not 'war'", async () => {
+            const chainReportServiceFactory =
+                makeStubChainReportServiceFactory();
+            const stubService = chainReportServiceFactory();
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({ rankedwarsEnd: 1, chainEnd: null }),
+                makeStubReportStore(),
+                () => stubService,
+            );
+            await controller.init();
+            expect(stubService.aggregate).not.toHaveBeenCalled();
+        });
+
+        it("sets eventType to 'unavailable' when aggregate throws", async () => {
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({
+                    rankedwarsEnd: null,
+                    chains: [{ id: 101, end: 1700000000 }],
+                }),
+                makeStubReportStore(),
+                makeStubChainReportServiceFactory({
+                    error: new Error("HTTP 401"),
+                }),
+            );
+            await controller.init();
+            expect(controller.viewModel.eventType).toBe("unavailable");
         });
     });
 });
