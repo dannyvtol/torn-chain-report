@@ -65,7 +65,6 @@ export class FactionController {
                     from: String(currentWar.start),
                 });
                 this.viewModel.chainIds = chainsResponse.chains
-                    .filter((entry) => entry.end !== null)
                     .map((entry) => entry.id);
                 this.viewModel.eventType = "war";
             } else if (chainActive) {
