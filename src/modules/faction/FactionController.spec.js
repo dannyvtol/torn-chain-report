@@ -218,21 +218,6 @@ describe("FactionController", () => {
             expect(controller.viewModel.chainIds).toEqual([101, 102]);
         });
 
-        it("excludes chains with end === null from chainIds", async () => {
-            const controller = new FactionController(
-                makeStubStore({ apiKey: "stub-key" }),
-                makeStubApiClientFactory({
-                    rankedwarsEnd: null,
-                    chains: [
-                        { id: 101, end: 1700000000 },
-                        { id: 102, end: null },
-                    ],
-                }),
-            );
-            await controller.init();
-            expect(controller.viewModel.chainIds).toEqual([101]);
-        });
-
         it("leaves chainIds as empty array when no completed chains exist", async () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),

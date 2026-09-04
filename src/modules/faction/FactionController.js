@@ -64,8 +64,9 @@ export class FactionController {
                 const chainsResponse = await apiClient.get("/faction/chains", {
                     from: String(currentWar.start),
                 });
-                this.viewModel.chainIds = chainsResponse.chains
-                    .map((entry) => entry.id);
+                this.viewModel.chainIds = chainsResponse.chains.map(
+                    (entry) => entry.id,
+                );
                 this.viewModel.eventType = "war";
             } else if (chainActive) {
                 this.viewModel.eventType = "chain";
