@@ -1,11 +1,17 @@
 import { ApiClient } from "../../shared/ApiClient.js";
+import { ChainReportService } from "../../shared/ChainReportService.js";
 import { MissingApiKey } from "../../shared/MissingApiKey.js";
+import { ReportStore } from "../../shared/stores/ReportStore.js";
 import { SettingsStore } from "../../shared/stores/SettingsStore.js";
 import { FactionView } from "./FactionView.js";
 import { FactionViewModel } from "./FactionViewModel.js";
 
+/** @typedef {import("../../shared/ApiClient.js").ApiClient} ApiClient */
+/** @typedef {import("../../shared/ChainReportService.js").ChainReportService} ChainReportService */
 /** @typedef {import("../../shared/stores/SettingsStore.js").SettingsStore} SettingsStore */
-/** @typedef {(apiKey: string) => import("../../shared/ApiClient.js").ApiClient} ApiClientFactory */
+/** @typedef {import("../../shared/stores/ReportStore.js").ReportStore} ReportStore */
+/** @typedef {(apiKey: string) => ApiClient} ApiClientFactory */
+/** @typedef {(apiClient: ApiClient) => ChainReportService} ChainReportServiceFactory */
 
 /**
  * @param {string} apiKey
@@ -15,18 +21,32 @@ function defaultApiClientFactory(apiKey) {
     return new ApiClient(apiKey);
 }
 
+/**
+ * @param {ApiClient} apiClient
+ * @returns {ChainReportService}
+ */
+function defaultChainReportServiceFactory(apiClient) {
+    return new ChainReportService(apiClient);
+}
+
 export class FactionController {
     /**
      * @param {SettingsStore} [settingsStore]
      * @param {ApiClientFactory} [apiClientFactory]
+     * @param {ReportStore} [reportStore]
+     * @param {ChainReportServiceFactory} [chainReportServiceFactory]
      */
     constructor(
         settingsStore = new SettingsStore(),
         apiClientFactory = defaultApiClientFactory,
+        reportStore = new ReportStore(),
+        chainReportServiceFactory = defaultChainReportServiceFactory,
     ) {
         this.viewModel = new FactionViewModel();
         this.settingsStore = settingsStore;
         this.apiClientFactory = apiClientFactory;
+        this.reportStore = reportStore;
+        this.chainReportServiceFactory = chainReportServiceFactory;
         this.view = new FactionView(this.viewModel, {
             onSave: () => this.settingsStore.setApiKey(this.viewModel.apiKey),
         });
@@ -67,6 +87,12 @@ export class FactionController {
                 this.viewModel.chainIds = chainsResponse.chains.map(
                     (entry) => entry.id,
                 );
+                const chainReportService =
+                    this.chainReportServiceFactory(apiClient);
+                const report = await chainReportService.aggregate(
+                    this.viewModel.chainIds,
+                );
+                await this.reportStore.setReport(report);
                 this.viewModel.eventType = "war";
             } else if (chainActive) {
                 this.viewModel.eventType = "chain";
