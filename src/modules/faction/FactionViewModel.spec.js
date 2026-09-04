@@ -24,4 +24,15 @@ describe("FactionViewModel", () => {
         viewModel.eventType = "war";
         expect(viewModel.eventType).toBe("war");
     });
+
+    it("chainIds getter returns empty array initially", () => {
+        const viewModel = new FactionViewModel();
+        expect(viewModel.chainIds).toEqual([]);
+    });
+
+    it("chainIds setter stores the value and getter returns it", () => {
+        const viewModel = new FactionViewModel();
+        viewModel.chainIds = [101, 202, 303];
+        expect(viewModel.chainIds).toEqual([101, 202, 303]);
+    });
 });

@@ -5,6 +5,9 @@ export class FactionViewModel {
     /** @type {string} */
     #eventType = "detecting";
 
+    /** @type {number[]} */
+    #chainIds = [];
+
     get apiKey() {
         return this.#apiKey;
     }
@@ -21,5 +24,14 @@ export class FactionViewModel {
     /** @param {string} value */
     set eventType(value) {
         this.#eventType = value;
+    }
+
+    get chainIds() {
+        return this.#chainIds;
+    }
+
+    /** @param {number[]} value */
+    set chainIds(value) {
+        this.#chainIds = value;
     }
 }
