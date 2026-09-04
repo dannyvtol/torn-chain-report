@@ -72,7 +72,7 @@ describe("FactionController", () => {
         const wrapper = document.querySelector(
             "#faction_war_list_id",
         )?.nextElementSibling;
-        expect(wrapper?.querySelector("span")?.textContent).toBe(
+        expect(wrapper?.querySelector(".cont-gray10 span")?.textContent).toBe(
             "Torn API-key",
         );
     });

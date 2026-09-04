@@ -12,15 +12,16 @@ describe("createPanel", () => {
         expect(root.children.length).toBe(2);
     });
 
-    it("root contains a title-black header with text 'Chain Report'", () => {
+    it("root contains a title-black header with a label span reading 'Chain Report'", () => {
         const { root } = createPanel();
         const header = root.querySelector(".title-black");
-        expect(header?.textContent).toBe("Chain Report");
+        const titleSpan = header?.querySelector("span");
+        expect(titleSpan?.textContent).toBe("Chain Report");
     });
 
     it("root contains a span with text 'Torn API-key'", () => {
         const { root } = createPanel();
-        const span = root.querySelector("span");
+        const span = root.querySelector(".cont-gray10 span");
         expect(span?.textContent).toBe("Torn API-key");
     });
 

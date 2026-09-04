@@ -33,7 +33,7 @@ describe("FactionView", () => {
 
     it("panel contains a span with text 'Torn API-key'", () => {
         view.render(mountElement);
-        const span = mountElement.firstElementChild.querySelector("span");
+        const span = mountElement.firstElementChild.querySelector(".cont-gray10 span");
         expect(span?.textContent).toBe("Torn API-key");
     });
 
@@ -92,21 +92,21 @@ describe("FactionView", () => {
     it("render() displays the initial eventType status text from viewModel", () => {
         viewModel.eventType = "chain";
         view.render(mountElement);
-        const status = mountElement.firstElementChild.querySelector("p");
+        const status = mountElement.firstElementChild.querySelector(".title-black span:last-child");
         expect(status?.textContent).toBe("Chain active");
     });
 
     it("updateEventType() updates the status text in the rendered panel", () => {
         view.render(mountElement);
         view.updateEventType("war");
-        const status = mountElement.firstElementChild.querySelector("p");
+        const status = mountElement.firstElementChild.querySelector(".title-black span:last-child");
         expect(status?.textContent).toBe("War active");
     });
 
     it("updateEventType() maps 'no-api-key' to correct label", () => {
         view.render(mountElement);
         view.updateEventType("no-api-key");
-        const status = mountElement.firstElementChild.querySelector("p");
+        const status = mountElement.firstElementChild.querySelector(".title-black span:last-child");
         expect(status?.textContent).toBe("API key missing");
     });
 });
