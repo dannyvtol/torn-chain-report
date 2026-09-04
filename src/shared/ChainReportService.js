@@ -44,7 +44,9 @@ export class ChainReportService {
         }
 
         const userId = userResult.value.profile.id;
-        const totals = Object.fromEntries(BREAKDOWN_FIELDS.map((field) => [field, 0]));
+        const totals = Object.fromEntries(
+            BREAKDOWN_FIELDS.map((field) => [field, 0]),
+        );
 
         for (const [index, result] of chainResults.entries()) {
             if (result.status === "rejected") {

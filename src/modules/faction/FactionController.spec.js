@@ -321,7 +321,8 @@ describe("FactionController", () => {
 
     describe("chain report aggregation", () => {
         it("calls aggregate with collected chainIds when war is active", async () => {
-            const chainReportServiceFactory = makeStubChainReportServiceFactory();
+            const chainReportServiceFactory =
+                makeStubChainReportServiceFactory();
             const stubService = chainReportServiceFactory();
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
@@ -354,11 +355,14 @@ describe("FactionController", () => {
                 }),
             );
             await controller.init();
-            expect(reportStore.setReport).toHaveBeenCalledWith(aggregatedReport);
+            expect(reportStore.setReport).toHaveBeenCalledWith(
+                aggregatedReport,
+            );
         });
 
         it("does not call aggregate when eventType is not 'war'", async () => {
-            const chainReportServiceFactory = makeStubChainReportServiceFactory();
+            const chainReportServiceFactory =
+                makeStubChainReportServiceFactory();
             const stubService = chainReportServiceFactory();
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
