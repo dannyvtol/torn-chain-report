@@ -2,6 +2,9 @@ export class FactionViewModel {
     /** @type {string} */
     #apiKey = "";
 
+    /** @type {string} */
+    #eventType = "detecting";
+
     get apiKey() {
         return this.#apiKey;
     }
@@ -9,5 +12,14 @@ export class FactionViewModel {
     /** @param {string} value */
     set apiKey(value) {
         this.#apiKey = value;
+    }
+
+    get eventType() {
+        return this.#eventType;
+    }
+
+    /** @param {string} value */
+    set eventType(value) {
+        this.#eventType = value;
     }
 }

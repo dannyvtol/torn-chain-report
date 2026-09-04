@@ -12,15 +12,16 @@ describe("createPanel", () => {
         expect(root.children.length).toBe(2);
     });
 
-    it("root contains a title-black header with text 'Chain Report'", () => {
+    it("root contains a title-black header with a label span reading 'Chain Report'", () => {
         const { root } = createPanel();
         const header = root.querySelector(".title-black");
-        expect(header?.textContent).toBe("Chain Report");
+        const titleSpan = header?.querySelector("span");
+        expect(titleSpan?.textContent).toBe("Chain Report");
     });
 
     it("root contains a span with text 'Torn API-key'", () => {
         const { root } = createPanel();
-        const span = root.querySelector("span");
+        const span = root.querySelector(".cont-gray10 span");
         expect(span?.textContent).toBe("Torn API-key");
     });
 
@@ -50,5 +51,21 @@ describe("createPanel", () => {
         const { root, input, button } = createPanel();
         expect(root.contains(input)).toBe(true);
         expect(root.contains(button)).toBe(true);
+    });
+
+    it("returns a statusElement ref inside root", () => {
+        const { root, statusElement } = createPanel();
+        expect(statusElement).not.toBeNull();
+        expect(root.contains(statusElement)).toBe(true);
+    });
+
+    it("statusElement displays the initialEventType text", () => {
+        const { statusElement } = createPanel({ initialEventType: "war" });
+        expect(statusElement.textContent).toBe("War active");
+    });
+
+    it("statusElement defaults to 'Detecting…' when initialEventType is omitted", () => {
+        const { statusElement } = createPanel();
+        expect(statusElement.textContent).toBe("Detecting…");
     });
 });

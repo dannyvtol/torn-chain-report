@@ -13,4 +13,15 @@ describe("FactionViewModel", () => {
         viewModel.apiKey = "abc123";
         expect(viewModel.apiKey).toBe("abc123");
     });
+
+    it("eventType getter returns 'detecting' initially", () => {
+        const viewModel = new FactionViewModel();
+        expect(viewModel.eventType).toBe("detecting");
+    });
+
+    it("eventType setter stores the value and getter returns it", () => {
+        const viewModel = new FactionViewModel();
+        viewModel.eventType = "war";
+        expect(viewModel.eventType).toBe("war");
+    });
 });
