@@ -15,17 +15,22 @@ export function createPanel({
     header.classList.add(
         "title-black",
         "m-top10",
-        "tt-foldable-infobox",
         "tt-infobox-title",
         "top-round",
     );
+    header.style = `
+        display: flex;
+        gap: 6px;
+    `;
+
     const titleSpan = document.createElement("span");
     titleSpan.textContent = "Chain Report";
 
     const statusElement = document.createElement("span");
-    statusElement.textContent = EVENT_TYPE_LABELS[initialEventType] ?? initialEventType;
+    statusElement.textContent =
+        EVENT_TYPE_LABELS[initialEventType] ?? initialEventType;
 
-    header.append(titleSpan, document.createTextNode(" - "), statusElement);
+    header.append(titleSpan, document.createTextNode("—"), statusElement);
 
     const container = document.createElement("div");
     container.classList.add("cont-gray10", "bottom-round", "tt-foldable");
