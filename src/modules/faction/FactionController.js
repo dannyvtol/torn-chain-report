@@ -41,10 +41,9 @@ export class FactionController {
         this.wrapper.dataset.tcr = "faction-panel";
 
         this.#injectWrapper();
-        this.#observeWrapper();
-
         this.view.render(this.wrapper);
 
+        this.#observeWrapper();
         await this.#detectEvent();
     }
 

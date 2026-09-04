@@ -23,6 +23,8 @@ export class FactionView {
      * @param {Element} wrapper
      */
     render(wrapper) {
+        if (wrapper.childElementCount) return;
+
         const { root, input, button, statusElement } = createPanel({
             initialValue: this.viewModel.apiKey,
             initialEventType: this.viewModel.eventType,
