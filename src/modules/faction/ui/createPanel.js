@@ -19,7 +19,13 @@ export function createPanel({
         "tt-infobox-title",
         "top-round",
     );
-    header.textContent = "Chain Report";
+    const titleSpan = document.createElement("span");
+    titleSpan.textContent = "Chain Report";
+
+    const statusElement = document.createElement("span");
+    statusElement.textContent = EVENT_TYPE_LABELS[initialEventType] ?? initialEventType;
+
+    header.append(titleSpan, document.createTextNode(" - "), statusElement);
 
     const container = document.createElement("div");
     container.classList.add("cont-gray10", "bottom-round", "tt-foldable");
@@ -38,12 +44,8 @@ export function createPanel({
     button.style = "margin-top: 10px;";
     button.textContent = "Save";
 
-    const statusElement = document.createElement("p");
-    statusElement.textContent =
-        EVENT_TYPE_LABELS[initialEventType] ?? initialEventType;
-
     form.append(label, input);
-    container.append(form, button, statusElement);
+    container.append(form, button);
     root.append(header, container);
 
     return { root, input, button, statusElement };
