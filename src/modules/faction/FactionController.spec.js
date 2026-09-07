@@ -17,12 +17,20 @@ function makeStubStore({ apiKey = "" } = {}) {
 }
 
 /**
- * @param {{ chainBreakdown?: Record<string, number> }} [options]
+ * @param {{ chainBreakdown?: Record<string, number>, lastInteraction?: number }} [options]
  * @returns {ReportStore}
  */
-function makeStubReportStore({ chainBreakdown = undefined } = {}) {
+function makeStubReportStore({
+    chainBreakdown = undefined,
+    lastInteraction = undefined,
+} = {}) {
     const storedReport =
-        chainBreakdown !== undefined ? { chainBreakdown } : null;
+        chainBreakdown !== undefined
+            ? {
+                  chainBreakdown,
+                  ...(lastInteraction !== undefined ? { lastInteraction } : {}),
+              }
+            : null;
     return {
         getReport: vi.fn().mockResolvedValue(storedReport),
         setReport: vi.fn().mockResolvedValue(undefined),
@@ -186,7 +194,9 @@ describe("FactionController", () => {
                 factory,
             );
             controller.init(); // intentionally not awaited
-            await Promise.resolve(); // flush microtasks up to the fetch calls
+            // Drain all pending microtasks (getApiKey + getReport) before
+            // asserting; a macro-task barrier is more robust than counting ticks.
+            await new Promise((resolve) => setTimeout(resolve, 0));
             expect(capturedEventType).toBe("detecting");
         });
 
@@ -417,7 +427,7 @@ describe("FactionController", () => {
         });
 
         it("persists aggregate result to ReportStore when war is active", async () => {
-            const aggregatedReport = { chainBreakdown: { leave: 3 } };
+            const chainBreakdown = { leave: 3 };
             const reportStore = makeStubReportStore();
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
@@ -426,14 +436,13 @@ describe("FactionController", () => {
                     chains: [{ id: 101, end: 1700000000 }],
                 }),
                 reportStore,
-                makeStubChainReportServiceFactory({
-                    chainBreakdown: aggregatedReport.chainBreakdown,
-                }),
+                makeStubChainReportServiceFactory({ chainBreakdown }),
             );
             await controller.init();
-            expect(reportStore.setReport).toHaveBeenCalledWith(
-                aggregatedReport,
-            );
+            expect(reportStore.setReport).toHaveBeenCalledWith({
+                chainBreakdown,
+                lastInteraction: expect.any(Number),
+            });
         });
 
         it("does not call aggregate when eventType is not 'war'", async () => {
@@ -464,6 +473,71 @@ describe("FactionController", () => {
             );
             await controller.init();
             expect(controller.viewModel.eventType).toBe("unavailable");
+        });
+    });
+
+    describe("30-minute cache", () => {
+        it("init() skips the full fetch when lastInteraction is under 30 minutes old", async () => {
+            const recentTimestamp = Date.now() - 5 * 60 * 1000;
+            const stubClient = makeStubApiClientFactory()("stub-key");
+            const controller = new FactionController(
+                makeStubStore(),
+                () => stubClient,
+                makeStubReportStore({
+                    chainBreakdown: { leave: 1 },
+                    lastInteraction: recentTimestamp,
+                }),
+            );
+            await controller.init();
+            expect(stubClient.get.mock.calls).toHaveLength(0);
+        });
+
+        it("init() renders cached chainBreakdown when lastInteraction is under 30 minutes old", async () => {
+            const recentTimestamp = Date.now() - 5 * 60 * 1000;
+            const cachedBreakdown = { leave: 2, mug: 1 };
+            const controller = new FactionController(
+                makeStubStore(),
+                makeStubApiClientFactory(),
+                makeStubReportStore({
+                    chainBreakdown: cachedBreakdown,
+                    lastInteraction: recentTimestamp,
+                }),
+            );
+            await controller.init();
+            expect(controller.viewModel.attackBreakdown).toEqual(cachedBreakdown);
+            const wrapper = document.querySelector(
+                "#faction_war_list_id",
+            )?.nextElementSibling;
+            expect(wrapper?.querySelector("dl")).not.toBeNull();
+        });
+
+        it("init() runs the full fetch when lastInteraction is 30 or more minutes old", async () => {
+            const staleTimestamp = Date.now() - 30 * 60 * 1000;
+            const stubClient = makeStubApiClientFactory()("stub-key");
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                () => stubClient,
+                makeStubReportStore({
+                    chainBreakdown: { leave: 1 },
+                    lastInteraction: staleTimestamp,
+                }),
+            );
+            await controller.init();
+            const rankedwarsCalls = stubClient.get.mock.calls.filter(
+                ([path]) => path === "/faction/rankedwars",
+            );
+            expect(rankedwarsCalls).toHaveLength(1);
+        });
+
+        it("init() does not update lastInteraction when the fetch fails", async () => {
+            const reportStore = makeStubReportStore();
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeErrorFactory(),
+                reportStore,
+            );
+            await controller.init();
+            expect(reportStore.setReport).not.toHaveBeenCalled();
         });
     });
 });
