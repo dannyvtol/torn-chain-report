@@ -26,4 +26,38 @@ describe("ReportStore", () => {
         await store.setReport(report);
         expect(globalThis.GM.setValue).toHaveBeenCalledWith("report", report);
     });
+
+    describe("isFresh", () => {
+        it("returns false when report is null", () => {
+            const store = new ReportStore();
+            expect(store.isFresh(null)).toBe(false);
+        });
+
+        it("returns true when lastInteraction is under 30 minutes ago", () => {
+            const store = new ReportStore();
+            const report = {
+                chainBreakdown: { leave: 1 },
+                lastInteraction: Date.now() - 5 * 60 * 1000,
+            };
+            expect(store.isFresh(report)).toBe(true);
+        });
+
+        it("returns false when lastInteraction is exactly 30 minutes ago", () => {
+            const store = new ReportStore();
+            const report = {
+                chainBreakdown: { leave: 1 },
+                lastInteraction: Date.now() - 30 * 60 * 1000,
+            };
+            expect(store.isFresh(report)).toBe(false);
+        });
+
+        it("returns false when lastInteraction is over 30 minutes ago", () => {
+            const store = new ReportStore();
+            const report = {
+                chainBreakdown: { leave: 1 },
+                lastInteraction: Date.now() - 31 * 60 * 1000,
+            };
+            expect(store.isFresh(report)).toBe(false);
+        });
+    });
 });

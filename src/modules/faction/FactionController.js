@@ -10,10 +10,9 @@ import { FactionViewModel } from "./FactionViewModel.js";
 /** @typedef {import("../../shared/ChainReportService.js").ChainReportService} ChainReportService */
 /** @typedef {import("../../shared/stores/SettingsStore.js").SettingsStore} SettingsStore */
 /** @typedef {import("../../shared/stores/ReportStore.js").ReportStore} ReportStore */
+/** @typedef {import("../../shared/stores/ReportStore.js").CachedReport} CachedReport */
 /** @typedef {(apiKey: string) => ApiClient} ApiClientFactory */
 /** @typedef {(apiClient: ApiClient) => ChainReportService} ChainReportServiceFactory */
-
-const CACHE_TTL_MS = 30 * 60 * 1000;
 
 /**
  * @param {string} apiKey
@@ -67,13 +66,9 @@ export class FactionController {
 
         const storedReport = await this.reportStore.getReport();
 
-        if (
-            storedReport !== null &&
-            Date.now() - storedReport.lastInteraction < CACHE_TTL_MS
-        ) {
+        if (this.reportStore.isFresh(storedReport)) {
             // Cache hit: render cached data and skip the full fetch chain.
-            this.viewModel.attackBreakdown = storedReport.chainBreakdown;
-            this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
+            this.#applyBreakdown(storedReport.chainBreakdown);
             return;
         }
 
@@ -83,15 +78,17 @@ export class FactionController {
             storedReport?.chainBreakdown !== undefined &&
             this.viewModel.attackBreakdown === null
         ) {
-            this.viewModel.attackBreakdown = storedReport.chainBreakdown;
-            this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
+            this.#applyBreakdown(storedReport.chainBreakdown);
         }
 
         this.#observeWrapper();
-        await this.#detectEvent();
+        await this.#detectEvent(storedReport);
     }
 
-    async #detectEvent() {
+    /**
+     * @param {CachedReport | null} storedReport
+     */
+    async #detectEvent(storedReport) {
         const apiClient = this.apiClientFactory(this.viewModel.apiKey);
 
         try {
@@ -103,6 +100,8 @@ export class FactionController {
             const currentWar = rankedwarsResponse.rankedwars[0];
             const warActive = currentWar.end === null;
             const chainActive = chainResponse.chain.end === null;
+
+            let chainBreakdown = storedReport?.chainBreakdown ?? {};
 
             if (warActive) {
                 const chainsResponse = await apiClient.get("/faction/chains", {
@@ -116,26 +115,46 @@ export class FactionController {
                 const report = await chainReportService.aggregate(
                     this.viewModel.chainIds,
                 );
-                await this.reportStore.setReport({
-                    chainBreakdown: report.chainBreakdown,
-                    lastInteraction: Date.now(),
-                });
-                this.viewModel.attackBreakdown = report.chainBreakdown;
+                chainBreakdown = report.chainBreakdown;
+                this.#applyBreakdown(chainBreakdown);
                 this.viewModel.eventType = "war";
             } else if (chainActive) {
                 this.viewModel.eventType = "chain";
             } else {
                 this.viewModel.eventType = "none";
             }
+
+            // Record lastInteraction for all non-failure branches so the
+            // 30-minute cache gate fires correctly on the next init().
+            await this.reportStore.setReport({
+                chainBreakdown,
+                lastInteraction: Date.now(),
+            });
         } catch (error) {
             if (error instanceof MissingApiKey) {
                 this.viewModel.eventType = "no-api-key";
             } else {
                 this.viewModel.eventType = "unavailable";
             }
+
+            // Explicitly show any stale stored breakdown so the user still
+            // sees data even when the fresh fetch fails.
+            if (storedReport?.chainBreakdown !== undefined) {
+                this.#applyBreakdown(storedReport.chainBreakdown);
+            }
         }
 
         this.view.updateEventType(this.viewModel.eventType);
+        this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
+    }
+
+    /**
+     * Applies a chain breakdown to the view model and triggers the view update.
+     *
+     * @param {Record<string, number>} breakdown
+     */
+    #applyBreakdown(breakdown) {
+        this.viewModel.attackBreakdown = breakdown;
         this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
     }
 

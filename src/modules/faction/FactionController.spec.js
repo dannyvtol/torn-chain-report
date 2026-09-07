@@ -16,6 +16,8 @@ function makeStubStore({ apiKey = "" } = {}) {
     };
 }
 
+const STUB_CACHE_TTL_MS = 30 * 60 * 1000;
+
 /**
  * @param {{ chainBreakdown?: Record<string, number>, lastInteraction?: number }} [options]
  * @returns {ReportStore}
@@ -34,6 +36,10 @@ function makeStubReportStore({
     return {
         getReport: vi.fn().mockResolvedValue(storedReport),
         setReport: vi.fn().mockResolvedValue(undefined),
+        isFresh: vi.fn().mockImplementation((report) => {
+            if (report === null) return false;
+            return Date.now() - report.lastInteraction < STUB_CACHE_TTL_MS;
+        }),
     };
 }
 
@@ -473,6 +479,71 @@ describe("FactionController", () => {
             );
             await controller.init();
             expect(controller.viewModel.eventType).toBe("unavailable");
+        });
+    });
+
+    describe("lastInteraction persistence", () => {
+        it("writes lastInteraction after a successful chainActive branch", async () => {
+            const reportStore = makeStubReportStore();
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({ rankedwarsEnd: 0, chainEnd: null }),
+                reportStore,
+            );
+            await controller.init();
+            expect(reportStore.setReport).toHaveBeenCalledWith(
+                expect.objectContaining({ lastInteraction: expect.any(Number) }),
+            );
+        });
+
+        it("writes lastInteraction after a successful none branch", async () => {
+            const reportStore = makeStubReportStore();
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({ rankedwarsEnd: 1, chainEnd: 1 }),
+                reportStore,
+            );
+            await controller.init();
+            expect(reportStore.setReport).toHaveBeenCalledWith(
+                expect.objectContaining({ lastInteraction: expect.any(Number) }),
+            );
+        });
+
+        it("preserves existing chainBreakdown when writing lastInteraction for non-war branches", async () => {
+            const existingBreakdown = { leave: 3, mug: 1 };
+            const reportStore = makeStubReportStore({
+                chainBreakdown: existingBreakdown,
+                lastInteraction: Date.now() - 60 * 60 * 1000,
+            });
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({ rankedwarsEnd: 1, chainEnd: 1 }),
+                reportStore,
+            );
+            await controller.init();
+            expect(reportStore.setReport).toHaveBeenCalledWith(
+                expect.objectContaining({ chainBreakdown: existingBreakdown }),
+            );
+        });
+    });
+
+    describe("failure behaviour", () => {
+        it("shows stale breakdown when the fetch fails and a stored breakdown exists", async () => {
+            const existingBreakdown = { leave: 2, mug: 0 };
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeErrorFactory(),
+                makeStubReportStore({
+                    chainBreakdown: existingBreakdown,
+                    lastInteraction: Date.now() - 60 * 60 * 1000,
+                }),
+            );
+            await controller.init();
+            expect(controller.viewModel.attackBreakdown).toEqual(existingBreakdown);
+            const wrapper = document.querySelector(
+                "#faction_war_list_id",
+            )?.nextElementSibling;
+            expect(wrapper?.querySelector("dl")).not.toBeNull();
         });
     });
 
