@@ -116,4 +116,64 @@ describe("FactionView", () => {
         );
         expect(status?.textContent).toBe("API key missing");
     });
+
+    describe("updateAttackBreakdown()", () => {
+        it("renders a <dl> inside the breakdown container when given data", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown({ leave: 5, mug: 2 });
+            const descriptionList =
+                mountElement.firstElementChild.querySelector("dl");
+            expect(descriptionList).not.toBeNull();
+        });
+
+        it("renders a <dt>/<dd> pair for each provided category", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown({ leave: 5, mug: 2 });
+            const panel = mountElement.firstElementChild;
+            expect(panel.querySelectorAll("dt")).toHaveLength(2);
+            expect(panel.querySelectorAll("dd")).toHaveLength(2);
+        });
+
+        it("renders category labels in <dt> elements", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown({ hospitalize: 10 });
+            const descriptionTerm =
+                mountElement.firstElementChild.querySelector("dt");
+            expect(descriptionTerm?.textContent).toBe("Hospitalize");
+        });
+
+        it("renders formatted counts in <dd> elements", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown({ leave: 1234 });
+            const descriptionDetail =
+                mountElement.firstElementChild.querySelector("dd");
+            expect(descriptionDetail?.textContent).toBe("1,234");
+        });
+
+        it("omits the <dl> when called with null", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown(null);
+            const descriptionList =
+                mountElement.firstElementChild.querySelector("dl");
+            expect(descriptionList).toBeNull();
+        });
+
+        it("removes a previously rendered <dl> when called with null", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown({ leave: 1 });
+            view.updateAttackBreakdown(null);
+            const descriptionList =
+                mountElement.firstElementChild.querySelector("dl");
+            expect(descriptionList).toBeNull();
+        });
+
+        it("replaces an existing <dl> when called again with new data", () => {
+            view.render(mountElement);
+            view.updateAttackBreakdown({ leave: 1 });
+            view.updateAttackBreakdown({ mug: 7 });
+            const panel = mountElement.firstElementChild;
+            expect(panel.querySelectorAll("dl")).toHaveLength(1);
+            expect(panel.querySelector("dt")?.textContent).toBe("Mug");
+        });
+    });
 });
