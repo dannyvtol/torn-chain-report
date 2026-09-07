@@ -126,20 +126,20 @@ describe("FactionView", () => {
             expect(descriptionList).not.toBeNull();
         });
 
-        it("renders a <dt>/<dd> pair for each provided category", () => {
+        it("renders all 11 <dt>/<dd> pairs regardless of which fields are populated", () => {
             view.render(mountElement);
             view.updateAttackBreakdown({ leave: 5, mug: 2 });
             const panel = mountElement.firstElementChild;
-            expect(panel.querySelectorAll("dt")).toHaveLength(2);
-            expect(panel.querySelectorAll("dd")).toHaveLength(2);
+            expect(panel.querySelectorAll("dt")).toHaveLength(11);
+            expect(panel.querySelectorAll("dd")).toHaveLength(11);
         });
 
-        it("renders category labels in <dt> elements", () => {
+        it("renders the raw field name in each <dt> element", () => {
             view.render(mountElement);
-            view.updateAttackBreakdown({ hospitalize: 10 });
+            view.updateAttackBreakdown({ leave: 10 });
             const descriptionTerm =
                 mountElement.firstElementChild.querySelector("dt");
-            expect(descriptionTerm?.textContent).toBe("Hospitalize");
+            expect(descriptionTerm?.textContent).toBe("leave");
         });
 
         it("renders formatted counts in <dd> elements", () => {
@@ -173,7 +173,7 @@ describe("FactionView", () => {
             view.updateAttackBreakdown({ mug: 7 });
             const panel = mountElement.firstElementChild;
             expect(panel.querySelectorAll("dl")).toHaveLength(1);
-            expect(panel.querySelector("dt")?.textContent).toBe("Mug");
+            expect(panel.querySelector("dt")?.textContent).toBe("leave");
         });
     });
 });

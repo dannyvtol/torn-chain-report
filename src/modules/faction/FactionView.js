@@ -1,4 +1,4 @@
-import { BREAKDOWN_LABELS } from "../../shared/ChainReportService.js";
+import { BREAKDOWN_FIELDS } from "../../shared/ChainReportService.js";
 import { formatNumber } from "../../shared/formatNumber.js";
 import { EVENT_TYPE_LABELS } from "./eventTypeLabels.js";
 import { createPanel } from "./ui/createPanel.js";
@@ -76,12 +76,14 @@ export class FactionView {
 
         const descriptionList = document.createElement("dl");
 
-        for (const [field, count] of Object.entries(attackBreakdown)) {
+        for (const field of BREAKDOWN_FIELDS) {
             const descriptionTerm = document.createElement("dt");
-            descriptionTerm.textContent = BREAKDOWN_LABELS[field] ?? field;
+            descriptionTerm.textContent = field;
 
             const descriptionDetail = document.createElement("dd");
-            descriptionDetail.textContent = formatNumber(count);
+            descriptionDetail.textContent = formatNumber(
+                attackBreakdown[field] ?? 0,
+            );
 
             descriptionList.append(descriptionTerm, descriptionDetail);
         }
