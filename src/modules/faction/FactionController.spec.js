@@ -319,6 +319,103 @@ describe("FactionController", () => {
         });
     });
 
+    describe("attack breakdown initialisation", () => {
+        it("sets viewModel.attackBreakdown from stored report on init", async () => {
+            const storedBreakdown = {
+                leave: 2,
+                mug: 0,
+                hospitalize: 5,
+                assists: 1,
+                retaliations: 0,
+                overseas: 3,
+                draws: 0,
+                escapes: 0,
+                losses: 1,
+                war: 0,
+                bonuses: 0,
+            };
+            const reportStore = {
+                getReport: vi
+                    .fn()
+                    .mockResolvedValue({ chainBreakdown: storedBreakdown }),
+                setReport: vi.fn().mockResolvedValue(undefined),
+            };
+            const controller = new FactionController(
+                makeStubStore(),
+                makeStubApiClientFactory(),
+                reportStore,
+            );
+            await controller.init();
+            expect(controller.viewModel.attackBreakdown).toEqual(
+                storedBreakdown,
+            );
+        });
+
+        it("leaves viewModel.attackBreakdown as null when no stored report", async () => {
+            const controller = new FactionController(
+                makeStubStore(),
+                makeStubApiClientFactory(),
+                makeStubReportStore(),
+            );
+            await controller.init();
+            expect(controller.viewModel.attackBreakdown).toBeNull();
+        });
+
+        it("updates viewModel.attackBreakdown after aggregation when war is active", async () => {
+            const chainBreakdown = { leave: 4, mug: 1 };
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({
+                    rankedwarsEnd: null,
+                    chains: [{ id: 101, end: 1700000000 }],
+                }),
+                makeStubReportStore(),
+                makeStubChainReportServiceFactory({ chainBreakdown }),
+            );
+            await controller.init();
+            expect(controller.viewModel.attackBreakdown).toEqual(
+                chainBreakdown,
+            );
+        });
+
+        it("renders a <dl> in the panel after aggregation when war is active", async () => {
+            const chainBreakdown = { leave: 4, mug: 1 };
+            const controller = new FactionController(
+                makeStubStore({ apiKey: "stub-key" }),
+                makeStubApiClientFactory({
+                    rankedwarsEnd: null,
+                    chains: [{ id: 101, end: 1700000000 }],
+                }),
+                makeStubReportStore(),
+                makeStubChainReportServiceFactory({ chainBreakdown }),
+            );
+            await controller.init();
+            const wrapper = document.querySelector(
+                "#faction_war_list_id",
+            )?.nextElementSibling;
+            expect(wrapper?.querySelector("dl")).not.toBeNull();
+        });
+
+        it("renders a <dl> in the panel when a stored report is present on init", async () => {
+            const reportStore = {
+                getReport: vi.fn().mockResolvedValue({
+                    chainBreakdown: { leave: 2, mug: 0 },
+                }),
+                setReport: vi.fn().mockResolvedValue(undefined),
+            };
+            const controller = new FactionController(
+                makeStubStore(),
+                makeStubApiClientFactory(),
+                reportStore,
+            );
+            await controller.init();
+            const wrapper = document.querySelector(
+                "#faction_war_list_id",
+            )?.nextElementSibling;
+            expect(wrapper?.querySelector("dl")).not.toBeNull();
+        });
+    });
+
     describe("chain report aggregation", () => {
         it("calls aggregate with collected chainIds when war is active", async () => {
             const chainReportServiceFactory =

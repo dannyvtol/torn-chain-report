@@ -63,6 +63,17 @@ export class FactionController {
         this.#injectWrapper();
         this.view.render(this.wrapper);
 
+        // Load the stored report without blocking event detection — the
+        // null-check prevents it from overwriting a fresh aggregation result
+        // that #detectEvent() may have already produced.
+        this.reportStore.getReport().then((storedReport) => {
+            if (this.viewModel.attackBreakdown === null) {
+                this.viewModel.attackBreakdown =
+                    storedReport?.chainBreakdown ?? null;
+                this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
+            }
+        });
+
         this.#observeWrapper();
         await this.#detectEvent();
     }
@@ -93,6 +104,7 @@ export class FactionController {
                     this.viewModel.chainIds,
                 );
                 await this.reportStore.setReport(report);
+                this.viewModel.attackBreakdown = report.chainBreakdown;
                 this.viewModel.eventType = "war";
             } else if (chainActive) {
                 this.viewModel.eventType = "chain";
@@ -108,6 +120,7 @@ export class FactionController {
         }
 
         this.view.updateEventType(this.viewModel.eventType);
+        this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
     }
 
     #injectWrapper() {
