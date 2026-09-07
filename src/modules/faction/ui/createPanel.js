@@ -49,9 +49,16 @@ export function createPanel({
     button.style = "margin-top: 10px;";
     button.textContent = "Save";
 
+    const breakdownContainer = document.createElement("div");
+    breakdownContainer.classList.add(
+        "cont-gray10",
+        "bottom-round",
+        "tt-foldable",
+    );
+
     form.append(label, input);
     container.append(form, button);
-    root.append(header, container);
+    root.append(header, container, breakdownContainer);
 
-    return { root, input, button, statusElement };
+    return { root, input, button, statusElement, breakdownContainer };
 }
