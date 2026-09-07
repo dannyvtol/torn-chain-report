@@ -16,10 +16,15 @@ function makeStubStore({ apiKey = "" } = {}) {
     };
 }
 
-/** @returns {ReportStore} */
-function makeStubReportStore() {
+/**
+ * @param {{ chainBreakdown?: Record<string, number> }} [options]
+ * @returns {ReportStore}
+ */
+function makeStubReportStore({ chainBreakdown = undefined } = {}) {
+    const storedReport =
+        chainBreakdown !== undefined ? { chainBreakdown } : null;
     return {
-        getReport: vi.fn().mockResolvedValue(null),
+        getReport: vi.fn().mockResolvedValue(storedReport),
         setReport: vi.fn().mockResolvedValue(undefined),
     };
 }
@@ -334,16 +339,10 @@ describe("FactionController", () => {
                 war: 0,
                 bonuses: 0,
             };
-            const reportStore = {
-                getReport: vi
-                    .fn()
-                    .mockResolvedValue({ chainBreakdown: storedBreakdown }),
-                setReport: vi.fn().mockResolvedValue(undefined),
-            };
             const controller = new FactionController(
                 makeStubStore(),
                 makeStubApiClientFactory(),
-                reportStore,
+                makeStubReportStore({ chainBreakdown: storedBreakdown }),
             );
             await controller.init();
             expect(controller.viewModel.attackBreakdown).toEqual(
@@ -361,7 +360,7 @@ describe("FactionController", () => {
             expect(controller.viewModel.attackBreakdown).toBeNull();
         });
 
-        it("updates viewModel.attackBreakdown after aggregation when war is active", async () => {
+        it("sets viewModel.attackBreakdown and renders <dl> after aggregation when war is active", async () => {
             const chainBreakdown = { leave: 4, mug: 1 };
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
@@ -376,20 +375,6 @@ describe("FactionController", () => {
             expect(controller.viewModel.attackBreakdown).toEqual(
                 chainBreakdown,
             );
-        });
-
-        it("renders a <dl> in the panel after aggregation when war is active", async () => {
-            const chainBreakdown = { leave: 4, mug: 1 };
-            const controller = new FactionController(
-                makeStubStore({ apiKey: "stub-key" }),
-                makeStubApiClientFactory({
-                    rankedwarsEnd: null,
-                    chains: [{ id: 101, end: 1700000000 }],
-                }),
-                makeStubReportStore(),
-                makeStubChainReportServiceFactory({ chainBreakdown }),
-            );
-            await controller.init();
             const wrapper = document.querySelector(
                 "#faction_war_list_id",
             )?.nextElementSibling;
@@ -397,16 +382,10 @@ describe("FactionController", () => {
         });
 
         it("renders a <dl> in the panel when a stored report is present on init", async () => {
-            const reportStore = {
-                getReport: vi.fn().mockResolvedValue({
-                    chainBreakdown: { leave: 2, mug: 0 },
-                }),
-                setReport: vi.fn().mockResolvedValue(undefined),
-            };
             const controller = new FactionController(
                 makeStubStore(),
                 makeStubApiClientFactory(),
-                reportStore,
+                makeStubReportStore({ chainBreakdown: { leave: 2, mug: 0 } }),
             );
             await controller.init();
             const wrapper = document.querySelector(
