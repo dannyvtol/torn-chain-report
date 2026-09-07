@@ -492,7 +492,9 @@ describe("FactionController", () => {
             );
             await controller.init();
             expect(reportStore.setReport).toHaveBeenCalledWith(
-                expect.objectContaining({ lastInteraction: expect.any(Number) }),
+                expect.objectContaining({
+                    lastInteraction: expect.any(Number),
+                }),
             );
         });
 
@@ -505,7 +507,9 @@ describe("FactionController", () => {
             );
             await controller.init();
             expect(reportStore.setReport).toHaveBeenCalledWith(
-                expect.objectContaining({ lastInteraction: expect.any(Number) }),
+                expect.objectContaining({
+                    lastInteraction: expect.any(Number),
+                }),
             );
         });
 
@@ -539,7 +543,9 @@ describe("FactionController", () => {
                 }),
             );
             await controller.init();
-            expect(controller.viewModel.attackBreakdown).toEqual(existingBreakdown);
+            expect(controller.viewModel.attackBreakdown).toEqual(
+                existingBreakdown,
+            );
             const wrapper = document.querySelector(
                 "#faction_war_list_id",
             )?.nextElementSibling;
@@ -575,7 +581,9 @@ describe("FactionController", () => {
                 }),
             );
             await controller.init();
-            expect(controller.viewModel.attackBreakdown).toEqual(cachedBreakdown);
+            expect(controller.viewModel.attackBreakdown).toEqual(
+                cachedBreakdown,
+            );
             const wrapper = document.querySelector(
                 "#faction_war_list_id",
             )?.nextElementSibling;
