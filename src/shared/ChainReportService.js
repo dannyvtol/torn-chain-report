@@ -14,6 +14,21 @@ export const BREAKDOWN_FIELDS = [
     "bonuses",
 ];
 
+/** @type {Record<string, string>} */
+export const BREAKDOWN_LABELS = {
+    leave: "Leave",
+    mug: "Mug",
+    hospitalize: "Hospitalize",
+    assists: "Assists",
+    retaliations: "Retaliations",
+    overseas: "Overseas",
+    draws: "Draws",
+    escapes: "Escapes",
+    losses: "Losses",
+    war: "War",
+    bonuses: "Bonuses",
+};
+
 export class ChainReportService {
     /** @type {ApiClient} */
     #apiClient;
