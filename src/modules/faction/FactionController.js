@@ -13,6 +13,8 @@ import { FactionViewModel } from "./FactionViewModel.js";
 /** @typedef {(apiKey: string) => ApiClient} ApiClientFactory */
 /** @typedef {(apiClient: ApiClient) => ChainReportService} ChainReportServiceFactory */
 
+const CACHE_TTL_MS = 30 * 60 * 1000;
+
 /**
  * @param {string} apiKey
  * @returns {ApiClient}
@@ -63,16 +65,27 @@ export class FactionController {
         this.#injectWrapper();
         this.view.render(this.wrapper);
 
-        // Load the stored report without blocking event detection — the
-        // null-check prevents it from overwriting a fresh aggregation result
-        // that #detectEvent() may have already produced.
-        this.reportStore.getReport().then((storedReport) => {
-            if (this.viewModel.attackBreakdown === null) {
-                this.viewModel.attackBreakdown =
-                    storedReport?.chainBreakdown ?? null;
-                this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
-            }
-        });
+        const storedReport = await this.reportStore.getReport();
+
+        if (
+            storedReport !== null &&
+            Date.now() - storedReport.lastInteraction < CACHE_TTL_MS
+        ) {
+            // Cache hit: render cached data and skip the full fetch chain.
+            this.viewModel.attackBreakdown = storedReport.chainBreakdown;
+            this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
+            return;
+        }
+
+        // Cache miss: optimistically display any stale cached breakdown while
+        // the fresh fetch is in flight, without blocking event detection.
+        if (
+            storedReport?.chainBreakdown !== undefined &&
+            this.viewModel.attackBreakdown === null
+        ) {
+            this.viewModel.attackBreakdown = storedReport.chainBreakdown;
+            this.view.updateAttackBreakdown(this.viewModel.attackBreakdown);
+        }
 
         this.#observeWrapper();
         await this.#detectEvent();
@@ -103,7 +116,10 @@ export class FactionController {
                 const report = await chainReportService.aggregate(
                     this.viewModel.chainIds,
                 );
-                await this.reportStore.setReport(report);
+                await this.reportStore.setReport({
+                    chainBreakdown: report.chainBreakdown,
+                    lastInteraction: Date.now(),
+                });
                 this.viewModel.attackBreakdown = report.chainBreakdown;
                 this.viewModel.eventType = "war";
             } else if (chainActive) {

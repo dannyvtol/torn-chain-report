@@ -1,13 +1,13 @@
 export class ReportStore {
     /**
-     * @returns {Promise<{ chainBreakdown: Record<string, number> } | null>}
+     * @returns {Promise<{ chainBreakdown: Record<string, number>, lastInteraction: number } | null>}
      */
     async getReport() {
         return globalThis.GM.getValue("report", null);
     }
 
     /**
-     * @param {{ chainBreakdown: Record<string, number> }} value
+     * @param {{ chainBreakdown: Record<string, number>, lastInteraction: number }} value
      * @returns {Promise<void>}
      */
     async setReport(value) {
