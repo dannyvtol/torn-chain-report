@@ -88,8 +88,8 @@ export class FactionController {
             ]);
 
             const currentWar = rankedwarsResponse.rankedwars[0];
-            const warActive = currentWar.end === null;
-            const chainActive = chainResponse.chain.end === null;
+            const warActive = currentWar.end === 0;
+            const chainActive = chainResponse.chain.end !== 0;
 
             if (warActive) {
                 const chainsResponse = await apiClient.get("/faction/chains", {
