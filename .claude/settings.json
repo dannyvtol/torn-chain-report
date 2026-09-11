@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/wsl/Projects/torn-chain-report/.claude/hooks/post-write-check.sh",
+            "timeout": 60000
+          }
+        ]
+      }
+    ]
+  }
+}
