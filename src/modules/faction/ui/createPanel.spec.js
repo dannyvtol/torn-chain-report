@@ -2,14 +2,14 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { createPanel } from "./createPanel.js";
 
-describe("createPanel", () => {
+describe("createPanel()", () => {
     afterEach(() => {
         document.body.innerHTML = "";
     });
 
-    it("returns a root element containing a header and container", () => {
+    it("returns a root element containing a header, settings container, and breakdown container", () => {
         const { root } = createPanel();
-        expect(root.children.length).toBe(2);
+        expect(root.children.length).toBe(3);
     });
 
     it("root contains a title-black header with a label span reading 'Chain Report'", () => {
@@ -67,5 +67,20 @@ describe("createPanel", () => {
     it("statusElement defaults to 'Detecting…' when initialEventType is omitted", () => {
         const { statusElement } = createPanel();
         expect(statusElement.textContent).toBe("Detecting…");
+    });
+
+    it("returns a breakdownContainer element", () => {
+        const { breakdownContainer } = createPanel();
+        expect(breakdownContainer).toBeInstanceOf(HTMLElement);
+    });
+
+    it("breakdownContainer is appended inside the root element", () => {
+        const { root, breakdownContainer } = createPanel();
+        expect(root.contains(breakdownContainer)).toBe(true);
+    });
+
+    it("breakdownContainer is empty by default", () => {
+        const { breakdownContainer } = createPanel();
+        expect(breakdownContainer.childElementCount).toBe(0);
     });
 });

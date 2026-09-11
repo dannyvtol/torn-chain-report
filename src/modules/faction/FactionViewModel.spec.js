@@ -35,4 +35,22 @@ describe("FactionViewModel", () => {
         viewModel.chainIds = [101, 202, 303];
         expect(viewModel.chainIds).toEqual([101, 202, 303]);
     });
+
+    it("attackBreakdown getter returns null initially", () => {
+        const viewModel = new FactionViewModel();
+        expect(viewModel.attackBreakdown).toBeNull();
+    });
+
+    it("attackBreakdown setter stores the value and getter returns it", () => {
+        const viewModel = new FactionViewModel();
+        viewModel.attackBreakdown = { leave: 3, mug: 1 };
+        expect(viewModel.attackBreakdown).toEqual({ leave: 3, mug: 1 });
+    });
+
+    it("attackBreakdown setter accepts null and getter returns null", () => {
+        const viewModel = new FactionViewModel();
+        viewModel.attackBreakdown = { leave: 1 };
+        viewModel.attackBreakdown = null;
+        expect(viewModel.attackBreakdown).toBeNull();
+    });
 });

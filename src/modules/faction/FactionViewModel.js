@@ -8,6 +8,9 @@ export class FactionViewModel {
     /** @type {number[]} */
     #chainIds = [];
 
+    /** @type {Record<string, number> | null} */
+    #attackBreakdown = null;
+
     get apiKey() {
         return this.#apiKey;
     }
@@ -33,5 +36,14 @@ export class FactionViewModel {
     /** @param {number[]} value */
     set chainIds(value) {
         this.#chainIds = value;
+    }
+
+    get attackBreakdown() {
+        return this.#attackBreakdown;
+    }
+
+    /** @param {Record<string, number> | null} value */
+    set attackBreakdown(value) {
+        this.#attackBreakdown = value;
     }
 }
