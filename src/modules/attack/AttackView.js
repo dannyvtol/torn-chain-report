@@ -6,7 +6,7 @@ export class AttackView {
         this.viewModel = viewModel;
     }
 
-    /** @param {Element} wrapper */
-    render(wrapper) {
+    /** @param {Element} _wrapper */
+    render(_wrapper) {
     }
 }
