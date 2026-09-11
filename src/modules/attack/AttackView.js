@@ -8,6 +8,5 @@ export class AttackView {
 
     /** @param {Element} wrapper */
     render(wrapper) {
-        if (wrapper.childElementCount) return;
     }
 }
