@@ -47,9 +47,9 @@ function makeStubChainReportServiceFactory({
 
 /**
  * @param {{
- *   rankedwarsEnd?: null | number,
+ *   rankedwarsWinner?: null | number,
  *   rankedwarsStart?: number,
- *   chainEnd?: null | number,
+ *   chainId?: number,
  *   chains?: Array<{ id: number, end: number | null }>,
  *   chainsError?: Error,
  *   userId?: number,
@@ -57,9 +57,9 @@ function makeStubChainReportServiceFactory({
  * @returns {(apiKey: string) => ApiClient}
  */
 function makeStubApiClientFactory({
-    rankedwarsEnd = 0,
+    rankedwarsWinner = null,
     rankedwarsStart = 1000000,
-    chainEnd = 0,
+    chainId = 0,
     chains = [],
     chainsError = undefined,
     userId = 1,
@@ -69,12 +69,12 @@ function makeStubApiClientFactory({
             if (path === "/faction/rankedwars") {
                 return Promise.resolve({
                     rankedwars: [
-                        { start: rankedwarsStart, end: rankedwarsEnd },
+                        { start: rankedwarsStart, winner: rankedwarsWinner },
                     ],
                 });
             }
             if (path === "/faction/chain") {
-                return Promise.resolve({ chain: { end: chainEnd } });
+                return Promise.resolve({ chain: { id: chainId } });
             }
             if (path === "/faction/chains") {
                 if (chainsError) return Promise.reject(chainsError);
@@ -190,39 +190,45 @@ describe("FactionController", () => {
             expect(capturedEventType).toBe("detecting");
         });
 
-        it("sets eventType to 'war' when rankedwars[0].end is null", async () => {
+        it("sets eventType to 'war' when rankedwars[0].winner is not null", async () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
-                makeStubApiClientFactory({ rankedwarsEnd: null, chainEnd: 0 }),
+                makeStubApiClientFactory({ rankedwarsWinner: 1, chainId: 0 }),
             );
             await controller.init();
             expect(controller.viewModel.eventType).toBe("war");
         });
 
-        it("sets eventType to 'chain' when chain.end is null and no active war", async () => {
+        it("sets eventType to 'chain' when chain.id is not 0 and no active war", async () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
-                makeStubApiClientFactory({ rankedwarsEnd: 0, chainEnd: null }),
+                makeStubApiClientFactory({
+                    rankedwarsWinner: null,
+                    chainId: 1,
+                }),
             );
             await controller.init();
             expect(controller.viewModel.eventType).toBe("chain");
         });
 
-        it("sets eventType to 'none' when both rankedwars and chain have non-null end", async () => {
+        it("sets eventType to 'none' when rankedwars[0].winner is null and chain.id is 0", async () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
-                makeStubApiClientFactory({ rankedwarsEnd: 1, chainEnd: 1 }),
+                makeStubApiClientFactory({
+                    rankedwarsWinner: null,
+                    chainId: 0,
+                }),
             );
             await controller.init();
             expect(controller.viewModel.eventType).toBe("none");
         });
 
-        it("war takes priority over chain when both have null end", async () => {
+        it("war takes priority over chain when winner is not null and chain.id is not 0", async () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
-                    chainEnd: null,
+                    rankedwarsWinner: 1,
+                    chainId: 1,
                 }),
             );
             await controller.init();
@@ -253,7 +259,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chains: [
                         { id: 101, end: 1700000000 },
                         { id: 102, end: 1700001000 },
@@ -268,7 +274,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chains: [],
                 }),
             );
@@ -280,7 +286,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chainsError: new Error("HTTP 503"),
                 }),
             );
@@ -290,7 +296,7 @@ describe("FactionController", () => {
 
         it("fetches chains with from set to war start as a string", async () => {
             const factory = makeStubApiClientFactory({
-                rankedwarsEnd: null,
+                rankedwarsWinner: 1,
                 rankedwarsStart: 1750000000,
                 chains: [],
             });
@@ -308,8 +314,8 @@ describe("FactionController", () => {
 
         it("does not fetch chains when eventType is not 'war'", async () => {
             const factory = makeStubApiClientFactory({
-                rankedwarsEnd: 1,
-                chainEnd: null,
+                rankedwarsWinner: null,
+                chainId: 1,
             });
             const stubClient = factory("stub-key");
             const controller = new FactionController(
@@ -365,7 +371,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chains: [{ id: 101, end: 1700000000 }],
                 }),
                 makeStubReportStore(),
@@ -403,7 +409,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chains: [
                         { id: 101, end: 1700000000 },
                         { id: 102, end: 1700001000 },
@@ -422,7 +428,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chains: [{ id: 101, end: 1700000000 }],
                 }),
                 reportStore,
@@ -442,7 +448,10 @@ describe("FactionController", () => {
             const stubService = chainReportServiceFactory();
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
-                makeStubApiClientFactory({ rankedwarsEnd: 1, chainEnd: null }),
+                makeStubApiClientFactory({
+                    rankedwarsWinner: null,
+                    chainId: 1,
+                }),
                 makeStubReportStore(),
                 () => stubService,
             );
@@ -454,7 +463,7 @@ describe("FactionController", () => {
             const controller = new FactionController(
                 makeStubStore({ apiKey: "stub-key" }),
                 makeStubApiClientFactory({
-                    rankedwarsEnd: null,
+                    rankedwarsWinner: 1,
                     chains: [{ id: 101, end: 1700000000 }],
                 }),
                 makeStubReportStore(),
