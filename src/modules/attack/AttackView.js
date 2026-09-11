@@ -7,6 +7,5 @@ export class AttackView {
     }
 
     /** @param {Element} _wrapper */
-    render(_wrapper) {
-    }
+    render(_wrapper) {}
 }
