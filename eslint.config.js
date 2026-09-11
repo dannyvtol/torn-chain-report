@@ -17,6 +17,7 @@ export default [
         },
         languageOptions: { globals: globals.browser },
         rules: {
+            "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
             "no-console": "warn",
             "id-length": ["error", { min: 3, exceptions: ["id", "i", "j", "GM"] }],
             "import/order": [
